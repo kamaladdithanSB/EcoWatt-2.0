@@ -1,0 +1,108 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Thermometer,
+  TrendingUp,
+  Shield,
+  Droplets,
+  Snowflake
+} from "lucide-react";
+
+export default function AgriculturalMetrics({ data }) {
+  if (!data) return null;
+
+  const metrics = [
+    {
+      label: "Soil Temperature",
+      value: `${data.soil_temperature}°F`,
+      icon: Thermometer,
+      color: "text-orange-600",
+      bg: "bg-orange-50"
+    },
+    {
+      label: "Growing Degree Days",
+      value: Math.round(data.growing_degree_days),
+      icon: TrendingUp,
+      color: "text-green-600",
+      bg: "bg-green-50"
+    },
+    {
+      label: "Disease Risk",
+      value: data.disease_pressure_risk,
+      icon: Shield,
+      color: data.disease_pressure_risk.toLowerCase().includes('high') ? "text-red-600" : 
+            data.disease_pressure_risk.toLowerCase().includes('moderate') ? "text-orange-600" : "text-green-600",
+      bg: data.disease_pressure_risk.toLowerCase().includes('high') ? "bg-red-50" : 
+          data.disease_pressure_risk.toLowerCase().includes('moderate') ? "bg-orange-50" : "bg-green-50"
+    },
+    {
+      label: "Evapotranspiration", 
+      value: `${data.evapotranspiration}" in`,
+      icon: Droplets,
+      color: "text-blue-600",
+      bg: "bg-blue-50"
+    },
+    {
+      label: "Frost Risk",
+      value: data.frost_risk,
+      icon: Snowflake,
+      color: data.frost_risk.toLowerCase().includes('high') ? "text-blue-600" : 
+            data.frost_risk.toLowerCase().includes('moderate') ? "text-yellow-600" : "text-green-600",
+      bg: data.frost_risk.toLowerCase().includes('high') ? "bg-blue-50" : 
+          data.frost_risk.toLowerCase().includes('moderate') ? "bg-yellow-50" : "bg-green-50"
+    }
+  ];
+
+  return (
+    <Card className="shadow-xl border-0 bg-gradient-to-br from-green-50 to-amber-50">
+      <CardHeader>
+        <CardTitle className="text-gray-900">Agricultural Metrics</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {metrics.map((metric, index) => (
+            <div
+              key={index}
+              className={`${metric.bg} rounded-xl p-4 border border-white/50 hover:shadow-md transition-all duration-200`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-white/70`}>
+                  <metric.icon className={`w-5 h-5 ${metric.color}`} />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-600">{metric.label}</div>
+                  <div className={`text-lg font-bold ${metric.color}`}>
+                    {metric.value}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Agricultural Insights */}
+        <div className="mt-6 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50">
+          <h4 className="font-semibold text-gray-900 mb-2">Agricultural Insights</h4>
+          <div className="space-y-2 text-sm text-gray-700">
+            <div className="flex items-start gap-2">
+              <span className="font-medium">Planting Conditions:</span>
+              <span>
+                {data.soil_temperature > 50 
+                  ? "Soil temperature favorable for planting" 
+                  : "Soil too cold for optimal planting"}
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-medium">Irrigation Need:</span>
+              <span>
+                {data.evapotranspiration > 0.25 
+                  ? "High water demand - consider irrigation" 
+                  : "Low water demand - irrigation may not be needed"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

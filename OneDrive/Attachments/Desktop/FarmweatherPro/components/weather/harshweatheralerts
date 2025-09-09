@@ -1,0 +1,86 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  AlertTriangle, 
+  CloudSnow, 
+  Zap, 
+  Wind,
+  Droplets
+} from "lucide-react";
+
+export default function HarshWeatherAlerts({ alerts }) {
+  if (!alerts || alerts.length === 0) return null;
+
+  const getAlertIcon = (type) => {
+    const alertType = type.toLowerCase();
+    if (alertType.includes('frost') || alertType.includes('freeze')) return CloudSnow;
+    if (alertType.includes('storm') || alertType.includes('thunder') || alertType.includes('hail')) return Zap;
+    if (alertType.includes('wind')) return Wind;
+    if (alertType.includes('rain') || alertType.includes('flood')) return Droplets;
+    return AlertTriangle;
+  };
+
+  const getSeverityColor = (severity) => {
+    const sev = severity.toLowerCase();
+    if (sev.includes('extreme') || sev.includes('severe')) return "border-red-500 bg-red-50";
+    if (sev.includes('moderate') || sev.includes('high')) return "border-orange-500 bg-orange-50";
+    return "border-yellow-500 bg-yellow-50";
+  };
+
+  const getSeverityTextColor = (severity) => {
+    const sev = severity.toLowerCase();
+    if (sev.includes('extreme') || sev.includes('severe')) return "text-red-800";
+    if (sev.includes('moderate') || sev.includes('high')) return "text-orange-800";
+    return "text-yellow-800";
+  };
+
+  return (
+    <Card className="border-0 shadow-xl bg-gradient-to-r from-red-50 to-orange-50">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-red-800">
+          <AlertTriangle className="w-5 h-5" />
+          Weather Alerts
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {alerts.map((alert, index) => {
+          const IconComponent = getAlertIcon(alert.type);
+          return (
+            <Alert 
+              key={index} 
+              className={`${getSeverityColor(alert.severity)} border-l-4`}
+            >
+              <div className="flex items-start gap-3">
+                <IconComponent className={`w-5 h-5 mt-0.5 ${getSeverityTextColor(alert.severity)}`} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`font-bold ${getSeverityTextColor(alert.severity)}`}>
+                      {alert.type}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full bg-white/70 ${getSeverityTextColor(alert.severity)}`}>
+                      {alert.severity}
+                    </span>
+                  </div>
+                  <AlertDescription className={`${getSeverityTextColor(alert.severity)} mb-2`}>
+                    {alert.description}
+                  </AlertDescription>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="font-medium">Timing: </span>
+                      {alert.timing}
+                    </div>
+                    <div>
+                      <span className="font-medium">Impact: </span>
+                      {alert.impact}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Alert>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}

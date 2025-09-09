@@ -1,0 +1,255 @@
+
+import React, { useState, useEffect, useCallback } from "react";
+import { InvokeLLM } from "@/integrations/Core";
+import { Location } from "@/entities/Location";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  RefreshCw,
+  MapPin,
+  Plus,
+  AlertTriangle
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+
+import CurrentWeather from "../components/weather/CurrentWeather";
+import WeatherForecast from "../components/weather/WeatherForecast";
+import HarshWeatherAlerts from "../components/weather/HarshWeatherAlerts";
+import AgriculturalMetrics from "../components/weather/AgriculturalMetrics";
+import LocationSelector from "../components/location/LocationSelector";
+
+export default function Dashboard() {
+  const [weatherData, setWeatherData] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [harshWeatherAlerts, setHarshWeatherAlerts] = useState([]);
+
+  useEffect(() => {
+    loadLocations();
+  }, []);
+
+  const loadLocations = async () => {
+    try {
+      const fetchedLocations = await Location.list();
+      setLocations(fetchedLocations);
+      if (fetchedLocations.length > 0) {
+        const primary = fetchedLocations.find(loc => loc.is_primary) || fetchedLocations[0];
+        setSelectedLocation(primary);
+      }
+    } catch (error) {
+      console.error("Error loading locations:", error);
+    }
+  };
+
+  const loadWeatherData = useCallback(async () => {
+    if (!selectedLocation) return;
+
+    setIsLoading(true);
+    try {
+      const weatherPrompt = `Get comprehensive weather data for farming at location: ${selectedLocation.address}.
+      Include current conditions, 7-day forecast, harsh weather alerts (frost, hail, heavy rain, drought, high winds),
+      and agricultural metrics like soil temperature, growing degree days, and humidity levels that affect crop diseases.
+      Focus on farming-specific weather information.`;
+
+      const result = await InvokeLLM({
+        prompt: weatherPrompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            current: {
+              type: "object",
+              properties: {
+                temperature: { type: "number" },
+                humidity: { type: "number" },
+                wind_speed: { type: "number" },
+                wind_direction: { type: "string" },
+                pressure: { type: "number" },
+                conditions: { type: "string" },
+                visibility: { type: "number" },
+                uv_index: { type: "number" },
+                feels_like: { type: "number" }
+              }
+            },
+            forecast: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  date: { type: "string" },
+                  high_temp: { type: "number" },
+                  low_temp: { type: "number" },
+                  conditions: { type: "string" },
+                  precipitation_chance: { type: "number" },
+                  precipitation_amount: { type: "number" },
+                  wind_speed: { type: "number" },
+                  humidity: { type: "number" }
+                }
+              }
+            },
+            harsh_weather_alerts: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  type: { type: "string" },
+                  severity: { type: "string" },
+                  description: { type: "string" },
+                  timing: { type: "string" },
+                  impact: { type: "string" }
+                }
+              }
+            },
+            agricultural_metrics: {
+              type: "object",
+              properties: {
+                soil_temperature: { type: "number" },
+                growing_degree_days: { type: "number" },
+                disease_pressure_risk: { type: "string" },
+                evapotranspiration: { type: "number" },
+                frost_risk: { type: "string" }
+              }
+            }
+          }
+        }
+      });
+
+      setWeatherData(result);
+      setHarshWeatherAlerts(result.harsh_weather_alerts || []);
+      setLastUpdated(new Date().toLocaleTimeString());
+    } catch (error) {
+      console.error("Error loading weather data:", error);
+    }
+    setIsLoading(false);
+  }, [selectedLocation]); // Added selectedLocation as a dependency
+
+  useEffect(() => {
+    if (selectedLocation) {
+      loadWeatherData();
+    }
+  }, [selectedLocation, loadWeatherData]); // Added loadWeatherData to dependencies
+
+  const refreshWeather = () => {
+    loadWeatherData();
+  };
+
+  if (locations.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="max-w-md w-full text-center">
+          <CardHeader>
+            <MapPin className="w-12 h-12 text-green-600 mx-auto mb-4" />
+            <CardTitle>Welcome to FarmWeather</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600">
+              Start by adding your farm locations to get personalized weather data and alerts.
+            </p>
+            <Link to={createPageUrl("Locations")}>
+              <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Location
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Weather Dashboard</h1>
+            {lastUpdated && (
+              <p className="text-sm text-gray-500 mt-1">Last updated: {lastUpdated}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <LocationSelector
+              locations={locations}
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+            />
+            <Button
+              onClick={refreshWeather}
+              disabled={isLoading}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {/* Harsh Weather Alerts */}
+        {harshWeatherAlerts.length > 0 && (
+          <HarshWeatherAlerts alerts={harshWeatherAlerts} />
+        )}
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <div className="grid grid-cols-2 gap-4">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Array(7).fill(0).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : weatherData ? (
+          <>
+            {/* Main Weather Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CurrentWeather
+                data={weatherData.current}
+                location={selectedLocation}
+              />
+              <AgriculturalMetrics
+                data={weatherData.agricultural_metrics}
+              />
+            </div>
+
+            {/* Forecast */}
+            <WeatherForecast forecast={weatherData.forecast} />
+          </>
+        ) : selectedLocation && (
+          <div className="text-center py-12">
+            <Button
+              onClick={loadWeatherData}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Load Weather Data
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

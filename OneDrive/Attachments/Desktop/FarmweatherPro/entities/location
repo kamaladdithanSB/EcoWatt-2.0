@@ -1,0 +1,31 @@
+{
+  "name": "Location",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the location (farm/field name)"
+    },
+    "address": {
+      "type": "string",
+      "description": "Full address or coordinates"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude coordinate"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude coordinate"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the primary location"
+    }
+  },
+  "required": [
+    "name",
+    "address"
+  ]
+}

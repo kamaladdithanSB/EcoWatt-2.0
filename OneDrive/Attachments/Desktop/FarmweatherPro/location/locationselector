@@ -1,0 +1,40 @@
+import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MapPin } from "lucide-react";
+
+export default function LocationSelector({ locations, selectedLocation, onLocationChange }) {
+  return (
+    <div className="flex items-center gap-2">
+      <MapPin className="w-4 h-4 text-gray-500" />
+      <Select
+        value={selectedLocation?.id || ""}
+        onValueChange={(value) => {
+          const location = locations.find(loc => loc.id === value);
+          onLocationChange(location);
+        }}
+      >
+        <SelectTrigger className="w-48">
+          <SelectValue placeholder="Select location" />
+        </SelectTrigger>
+        <SelectContent>
+          {locations.map((location) => (
+            <SelectItem key={location.id} value={location.id}>
+              <div className="flex items-center gap-2">
+                {location.is_primary && (
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                )}
+                {location.name}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}

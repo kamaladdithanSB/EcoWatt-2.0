@@ -1,0 +1,188 @@
+
+import React, { useState, useEffect, useCallback } from "react";
+import { InvokeLLM } from "@/integrations/Core";
+import { Location } from "@/entities/Location";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle, RefreshCw, MapPin } from "lucide-react";
+
+import HarshWeatherAlerts from "../components/weather/HarshWeatherAlerts";
+
+export default function Alerts() {
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(() => {
+    loadLocations();
+  }, []);
+
+  const loadLocations = async () => {
+    try {
+      const fetchedLocations = await Location.list();
+      setLocations(fetchedLocations);
+      if (fetchedLocations.length > 0) {
+        const primary = fetchedLocations.find(loc => loc.is_primary) || fetchedLocations[0];
+        setSelectedLocation(primary);
+      }
+    } catch (error) {
+      console.error("Error loading locations:", error);
+    }
+  };
+
+  const loadAlerts = useCallback(async () => {
+    if (!selectedLocation) return;
+
+    setIsLoading(true);
+    try {
+      const alertPrompt = `Get comprehensive harsh weather alerts and warnings for farming operations at location: ${selectedLocation.address}. 
+      Focus on agricultural threats including frost warnings, hail risks, severe storms, drought conditions, high winds, 
+      heavy rainfall that could damage crops, extreme temperatures, and any other weather conditions that could impact farming.
+      Provide detailed timing, severity levels, and specific agricultural impacts for each alert.`;
+
+      const result = await InvokeLLM({
+        prompt: alertPrompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            alerts: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  type: { type: "string" },
+                  severity: { type: "string" },
+                  description: { type: "string" },
+                  timing: { type: "string" },
+                  impact: { type: "string" },
+                  recommendations: { type: "string" }
+                }
+              }
+            },
+            general_outlook: { type: "string" }
+          }
+        }
+      });
+
+      setAlerts(result.alerts || []);
+      setLastUpdated(new Date().toLocaleTimeString());
+    } catch (error) {
+      console.error("Error loading alerts:", error);
+    }
+    setIsLoading(false);
+  }, [selectedLocation]); // selectedLocation is a dependency for this useCallback
+
+  useEffect(() => {
+    if (selectedLocation) {
+      loadAlerts();
+    }
+  }, [selectedLocation, loadAlerts]); // loadAlerts itself is a dependency now, as it's memoized
+
+  const refreshAlerts = () => {
+    loadAlerts();
+  };
+
+  if (locations.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card className="max-w-md w-full text-center">
+          <CardHeader>
+            <MapPin className="w-12 h-12 text-green-600 mx-auto mb-4" />
+            <CardTitle>No Locations Found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Add farm locations to receive weather alerts.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Weather Alerts</h1>
+            <p className="text-gray-600 mt-1">Monitor harsh weather conditions that could affect your crops</p>
+            {lastUpdated && (
+              <p className="text-sm text-gray-500 mt-1">Last updated: {lastUpdated}</p>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <Select
+                value={selectedLocation?.id || ""}
+                onValueChange={(value) => {
+                  const location = locations.find(loc => loc.id === value);
+                  setSelectedLocation(location);
+                }}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              onClick={refreshAlerts} 
+              disabled={isLoading}
+              variant="outline"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array(3).fill(0).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : alerts.length > 0 ? (
+          <HarshWeatherAlerts alerts={alerts} />
+        ) : (
+          <Card className="text-center py-12">
+            <CardContent>
+              <AlertTriangle className="w-12 h-12 text-green-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No Active Weather Alerts
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Great news! No harsh weather conditions are currently forecasted for {selectedLocation?.name}.
+              </p>
+              <Button onClick={refreshAlerts} variant="outline">
+                Check Again
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,249 @@
+
+import React, { useState, useEffect } from "react";
+import { Location } from "@/entities/Location";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, MapPin, Trash2, Star } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+export default function Locations() {
+  const [locations, setLocations] = useState([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    is_primary: false
+  });
+  const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    loadLocations();
+  }, []);
+
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return 'Unknown';
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.warn('Date formatting error:', error);
+      return 'Unknown';
+    }
+  };
+
+  const loadLocations = async () => {
+    try {
+      const fetchedLocations = await Location.list();
+      setLocations(fetchedLocations);
+    } catch (error) {
+      setMessage({ type: "error", text: "Error loading locations" });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.address.trim()) {
+      setMessage({ type: "error", text: "Please fill in all fields" });
+      return;
+    }
+
+    try {
+      // If this is being set as primary, remove primary from others
+      if (formData.is_primary) {
+        const primaryLocation = locations.find(loc => loc.is_primary);
+        if (primaryLocation) {
+          await Location.update(primaryLocation.id, { is_primary: false });
+        }
+      }
+
+      await Location.create(formData);
+      setFormData({ name: "", address: "", is_primary: false });
+      setShowAddForm(false);
+      setMessage({ type: "success", text: "Location added successfully!" });
+      loadLocations();
+    } catch (error) {
+      setMessage({ type: "error", text: "Error adding location" });
+    }
+  };
+
+  const setPrimary = async (locationId) => {
+    try {
+      // Remove primary from all locations
+      for (const location of locations) {
+        await Location.update(location.id, { is_primary: false });
+      }
+      // Set new primary
+      await Location.update(locationId, { is_primary: true });
+      setMessage({ type: "success", text: "Primary location updated!" });
+      loadLocations();
+    } catch (error) {
+      setMessage({ type: "error", text: "Error updating primary location" });
+    }
+  };
+
+  const deleteLocation = async (locationId) => {
+    if (window.confirm("Are you sure you want to delete this location?")) {
+      try {
+        await Location.delete(locationId);
+        setMessage({ type: "success", text: "Location deleted successfully!" });
+        loadLocations();
+      } catch (error) {
+        setMessage({ type: "error", text: "Error deleting location" });
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Farm Locations</h1>
+            <p className="text-gray-600 mt-1">Manage your farm and field locations</p>
+          </div>
+          <Button
+            onClick={() => setShowAddForm(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Location
+          </Button>
+        </div>
+
+        {message && (
+          <Alert variant={message.type === "error" ? "destructive" : "default"}>
+            <AlertDescription>{message.text}</AlertDescription>
+          </Alert>
+        )}
+
+        {showAddForm && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Add New Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Location Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g., North Field, Main Farm, etc."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="address">Address or Coordinates</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    placeholder="123 Farm Rd, City, State or 40.7128, -74.0060"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="primary"
+                    checked={formData.is_primary}
+                    onCheckedChange={(checked) => setFormData({...formData, is_primary: checked})}
+                  />
+                  <Label htmlFor="primary">Set as primary location</Label>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                    Add Location
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowAddForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid gap-4">
+          {locations.map((location) => (
+            <Card key={location.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <MapPin className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {location.name}
+                        </h3>
+                        {location.is_primary && (
+                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                        )}
+                      </div>
+                      <p className="text-gray-600">{location.address}</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Added {formatDate(location.created_date)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {!location.is_primary && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPrimary(location.id)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <Star className="w-4 h-4 mr-1" />
+                        Set Primary
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteLocation(location.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          
+          {locations.length === 0 && !showAddForm && (
+            <div className="text-center py-12">
+              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No locations added yet</h3>
+              <p className="text-gray-600 mb-4">
+                Add your farm locations to start getting weather data.
+              </p>
+              <Button
+                onClick={() => setShowAddForm(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Location
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
