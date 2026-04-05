@@ -1,90 +1,36 @@
-# ⚡ EcoWattAI 2.0: The Kinetic Monolith version!
-> **Intelligent Energy Command & Control Terminal**
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-[![Live Demo](https://img.shields.io/badge/DEMO-LIVE-00FFFF?style=for-the-badge&logo=vercel)](https://ecowattai.netlify.app)
-[![Tech Stack](https://img.shields.io/badge/STACK-NEXT.JS_15-white?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
-[![UI Style](https://img.shields.io/badge/DESIGN-ANTIGRAVITY-4CE346?style=for-the-badge)](https://github.com)
+## Getting Started
 
----
-
-## 🌌 Overview
-**EcoWattAI 2.0** is not a dashboard; it is a **Smart Energy Coach** designed as a high-fidelity physics terminal. It leverages Machine Learning to dissect household consumption, detect "vampire loads," and simulate a cleaner, optimized future.
-
-Built with an **Antigravity Design Philosophy**, the UI emphasizes depth, metallic finishes, and kinetic motion, turning energy conservation into a high-stakes tactical simulation.
-
----
-
-## 🛠️ The Technical Arsenal
-
-### 🧠 The Neural Engine (AI/ML)
-EcoWattAI runs native JavaScript ML algorithms directly on the edge for zero-latency insights:
-* **K-Means Clustering:** Segmenting energy usage into "Tiered Congestion" zones to identify peak-hour inefficiencies.
-* **Linear Regression:** Predictive forecasting that maps tomorrow’s energy "Payload" against historical baselines.
-
-### 🏗️ Core Architecture
-* **Frontend:** Next.js 15 (App Router) with Framer Motion for kinetic transitions.
-* **Backend:** Serverless Node.js architecture with **Prisma ORM**.
-* **Database:** High-performance SQLite instance for localized telemetry storage.
-* **Visuals:** `Recharts` injected with custom neon glow-filters and CSS Variable mapping.
-
----
-
-## 🚀 Key Modules
-
-### 📟 01. Real-Time Simulation
-A live telemetry crawl that visualizes the "Before vs. After" optimization. Watch as the AI flattens the peak curves in real-time using a dual-trace oscillatory mapping.
-
-### 🏆 02. Gamification & "Green Score"
-Your efficiency is your currency. Earn badges like **GRID GHOST** and **SOLAR PIONEER** while your **MONOLITH SCORE** reacts dynamically to your carbon footprint.
-
-### 🛠️ 03. Ghost Protocol Suggestions
-Move beyond passive advice. Authorize "Ghost Protocols" to sever inefficient loads. The UI transitions into a high-priority "Authorized" state with haptic visual feedback.
-
-### 🧮 04. System Impact Calculator
-Interactive "Energy Physics" sliders. Recalculate ROI, CO2e avoidance, and financial savings with instantaneous localized formulas.
-
----
-
-## 🎨 Design Identity: "Kinetic Monolith"
-The project abandons flat design for a heavy, physical aesthetic:
-* **Metallic Insets:** Components feel like they are machined out of brushed aluminum.
-* **Glassmorphism:** `20px` backdrop blurs create a "tinted cockpit" depth.
-* **Neon Accents:** Primary Cyan (`#00FFFF`) and Secondary Green (`#4CE346`) drive the visual hierarchy.
-
----
-
-## 📥 Local Deployment
+First, run the development server:
 
 ```bash
-# 1. Clone the Terminal
-git clone [https://github.com/your-username/ecowattai.git](https://github.com/your-username/ecowattai.git)
-
-# 2. Install High-Output Dependencies
-npm install
-
-# 3. Initialize the Neural Database
-npx prisma migrate dev
-npm run seed
-
-# 4. Launch the Command Center
 npm run dev
-📡 Live Telemetry
-Access the deployed terminal at:
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-👉 ecowattai.netlify.app
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-<p align="center">
-<i>"Because every watt saved is a step toward a cleaner future."</i>
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-<b>Designed & Engineered by Kamal Addithan (The_code_learner)</b>
-</p>
+## Learn More
 
+To learn more about Next.js, take a look at the following resources:
 
------
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### 💡 Final Touch for the "Wow" Factor:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Since you mentioned the **Ghost Protocol** and the **Monolith** score, I added those as specific sections in the README. When you post this on your **X account (The\_code\_learner)**, make sure to record a screen capture of the **Simulation Page** while the lines are crawling—that’s the money shot\!
+## Deploy on Vercel
 
-What’s the next move? Are we scaling this to support real-world IoT sensors, or starting a new
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
