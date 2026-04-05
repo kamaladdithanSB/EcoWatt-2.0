@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+  /* Core Base */
+  --bg-color: #131313;
+  --surface: #131313;
+  --surface-container-low: #1C1B1B;
+  --surface-container-high: #2A2A2A;
+  --surface-container-highest: #353534;
+  --surface-variant: rgba(53, 53, 52, 0.4); /* Used for glassmorphism */
+  
+  /* Accents */
+  --primary: #00FFFF;
+  --primary-container: #00FBFB;
+  --primary-dim: #00DDDD;
+  --secondary: #4CE346;
+  
+  /* Typography Colors */
+  --on-surface: #E5E2E1;
+  --on-surface-variant: #B9CAC9;
+
+  /* Structural/Borders */
+  --outline-variant: rgba(58, 74, 73, 0.1); /* The "Ghost Border" */
+
+  /* Typography Fonts */
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  /* The overarching moody atmosphere */
+  min-height: 100vh;
+  /* Ambient glowing background effect */
+  background-image: radial-gradient(circle at 50% 0%, rgba(0, 255, 255, 0.03) 0%, transparent 60%);
+}
+
+h1, h2, h3, h4, .headline {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  color: #FFF;
+  letter-spacing: -0.02em;
+}
+
+.data-mono {
+  font-family: monospace;
+  letter-spacing: 0.1em;
+}
+
+/* The Kinetic Design Rules */
+.glass-overlay {
+  background: var(--surface-variant);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+.antigravity-shadow {
+  box-shadow: 0 20px 60px rgba(0, 255, 255, 0.04);
+}
+
+/* Base interactive transitions */
+button, a, .interactive-card {
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* No 1px strict lines rule! We use border-bottom with extreme transparency if absolutely needed */
+.ghost-border {
+  border: 1px solid var(--outline-variant);
+}

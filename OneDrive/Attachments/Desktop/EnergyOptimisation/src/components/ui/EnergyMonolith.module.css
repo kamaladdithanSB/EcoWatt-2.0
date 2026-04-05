@@ -1,0 +1,19 @@
+.monolith {
+  background: var(--surface-variant);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px; /* max lg as per rules */
+  padding: 2rem;
+}
+
+.energyLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--primary);
+  box-shadow: 2px 0 15px var(--primary);
+}

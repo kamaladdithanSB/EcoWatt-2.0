@@ -1,0 +1,63 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--surface-container-highest);
+  border-right: 1px solid var(--outline-variant); /* Ghost Border */
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  z-index: 10;
+}
+
+.logo {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navItem {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navItem:hover {
+  background: rgba(0, 255, 255, 0.05);
+  color: var(--on-surface);
+}
+
+.navItem.active {
+  background: rgba(0, 255, 255, 0.1);
+  color: var(--primary);
+  border-left: 2px solid var(--primary);
+}
+
+.main {
+  flex: 1;
+  padding: 2.5rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}

@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model EnergyData {
+  id          String   @id @default(cuid())
+  timestamp   DateTime
+  consumption Float    // Energy consumed in kWh
+  temperature Float?   // Optional environmental info if uploaded
+  createdAt   DateTime @default(now())
+}
+
+model UserStats {
+  id             String   @id @default(cuid())
+  greenScore     Int      @default(0)
+  treesPlanted   Float    @default(0.0)
+  co2SavedKg     Float    @default(0.0)
+  lastUpdated    DateTime @updatedAt
+}
